@@ -7,37 +7,12 @@ const teacherSchema = new mongoose.Schema({
         required:true
     },
     course:[{
+        type: ObjectId,
+        ref: 'user'
+    }]
     
-            name:{
-                type:String
-            },
-           batch:{
-               type:String
-           },
-           sem:{
-               type:String
-           },
-         question:[{
-             text:{
-                type:ObjectId,
-                ref:'question'    
-             },
-             good:[{
-                 type:ObjectId,
-                 ref:'student'
-             }],
-             bad:[{
-                 type:ObjectId,
-                 ref:'student'
-             }],
-             poor:[{
-                 type:ObjectId,
-                 ref:'student'
-             }]
-         }]
-        
-    }],
+            
     
 })
-console.log('hello')
+
 module.exports  = mongoose.model('teacher',teacherSchema);
