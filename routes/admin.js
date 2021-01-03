@@ -8,17 +8,16 @@ const Student = require('../model/student');
 //teacher DB
 const Teacher = require('../model/teacher');
 
-//question DB
-const Question = require('../model/question');
 
-
+//course DB
+const Course = require('../model/course');
 
 //@desc for post student data to admin
 //@route post /admin/poststudent
 router.post('/poststudent', (req, res) => {
-    const { name, batch, admno, sem } = req.body;
+    const { name, batch, admno, sem, course } = req.body;
 
-    if (!name || !batch || !admno || !sem) return res.json({ error: 'enter all fields' });
+    if (!name || !batch || !admno || !sem || !course) return res.json({ error: 'enter all fields' });
 
     Student.findOne({ admno: admno }).then(existingUser => {
         if (existingUser) {
@@ -28,7 +27,8 @@ router.post('/poststudent', (req, res) => {
                 name,
                 batch,
                 admno,
-                sem
+                sem,
+                course
             }).save().then(data => {
                 console.log(data);
                 return res.json(data)
@@ -39,8 +39,10 @@ router.post('/poststudent', (req, res) => {
 
 
 })
+
 //@desc for post teacher data to admin
 //@route post /admin/post/teacher
+
 router.post('/post/teacher', (req, res) => {
     const { name } = req.body;
     if (!name) return res.json({ error: 'fill all fields' });
@@ -51,6 +53,7 @@ router.post('/post/teacher', (req, res) => {
 
 //@desc for get teacher data to admin
 //@route get /admin/show/teacher
+
 router.get('/show/teacher', requirelogin, (req, res) => {
     Teacher.find().then(data => res.json(data))
 })
@@ -58,32 +61,30 @@ router.get('/show/teacher', requirelogin, (req, res) => {
 
 
 //@desc for post subjects for teacher
-//@route put /admin/post/subject
+//@route post /admin/post/subject/:id
 
-router.put('/post/subject', (req, res) => {
-    const course = {
-        batch: req.body.batch,
-        sem: req.body.sem,
-        name: req.body.name,
+router.put("/post/subject/:id", (req, res) => {
+    const { name, batch, sem, } = req.body;
+    if (!name || !batch || !sem) return res.json({ error: "fill all the fields" });
 
-    }
-
-
-    Teacher.findByIdAndUpdate(req.body.id, {
-        $push: { course: course }
-    },
-        {
+    new Course({
+        name,
+        batch,
+        sem
+    }).save().then(data => {
+        Teacher.findByIdAndUpdate(req.params.id, {
+            $push: { 'course': data._id }
+        }, {
             new: true
-        }
-    ).exec((err, subjetadd) => {
-        if(err){
-            console.log('you have an error in put subject',err)
-        }
-        res.json(subjetadd)
-
+        }).populate('course').then(show => res.json(show))
+            .catch(e => {
+                console.log('error @ added subject', e)
+            })
+    }).catch(e => {
+        console.log('error @ post subject', e)
     })
-})
 
+})
 
 
 //@desc adding question
@@ -91,34 +92,29 @@ router.put('/post/subject', (req, res) => {
 
 router.post('/question', (req, res) => {
 
-    new Question({
-        question: req.body.question,
-
-    }).save().then(data => {
-            res.json(data)
-       Teacher.find().then(teachers=>{
-            teachers.map(singleTeacher=>{
-               singleTeacher.course.map(singleCouse=>{
-                   
-                       const question = {
-                           text:data._id
-                       }
-                   
-                   Teacher.findOneAndUpdate({'course._id':singleCouse._id},{
-                    $push: { 'course.$.question': question }
-                     
-                   },
-                   {
-                       new:true
-                   }).exec((e,final)=>console.log(final))
-               })    
+        const question = {
+            text: req.body.question
+        }
+        Course.find().then(allCourse => {
+            allCourse.map(singleCourse => {
+                Course.findByIdAndUpdate(singleCourse._id, {
+                    $push: { 'question': question }
+                }, {
+                    new: true
+                }).exec((e, data) => {
+                    if(e){
+                        return cosole.log(e)
+                    }
+                    console.log(data)
+                })
             })
-       })
+        })
     })
-})
+
 
 //test
 //put /admin/update
+
 router.put("/update", (req, res) => {
     const question = {
         text: req.body.id
@@ -131,7 +127,7 @@ router.put("/update", (req, res) => {
 })
 //test
 router.get('/check', (req, res) => {
-    Teacher.find().populate('course.question.text').then(data => res.json(data))
+    Course.find().populate('question.text').then(data => res.json(data))
 })
 
 

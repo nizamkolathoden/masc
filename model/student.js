@@ -5,7 +5,7 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    batch: {
+    course: {
         type: String,
         required: true
     },
@@ -15,6 +15,10 @@ const studentSchema = new mongoose.Schema({
     admno: {
         type: String,
         required: true
+    },
+    batch:{
+        type:String,
+        required:true
     },
 
     totalattends: {

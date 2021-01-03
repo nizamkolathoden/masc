@@ -14,8 +14,8 @@ router.put('/showteacher', requireLogin,(req, res) => {
     if (!batch) return res.status(402).json({ error: 'enter bath' });
 
 
-    Teacher.find().elemMatch("course", { batch: batch, sem: sem }).then(data => res.json(data))
-
+    Teacher.find().populate('course').then(data => res.json(data))
+    // .elemMatch("course", { batch: batch, sem: sem })
 })
 
 
@@ -27,6 +27,7 @@ router.get('/teacherprofile/:id',requireLogin, (req, res) => {
 
     Teacher.findOne({ "course._id": req.params.id }).then(data => res.json(data)).catch(e => console.log('error at show single subject', e))
 })
+
 
 
 
