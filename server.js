@@ -19,4 +19,4 @@ app.use('/all',require('./routes/all'))
 
 const PORT = process.env.PORT
 
-app.listen(PORT, () => console.log(`server running on ${process.env.NODE_ENV} in ${PORT}`))
+app.listen(PORT, () => console.log(`server running on ${process.env.NODE_ENV} in ${PORT}  🔥🚀🔥`))

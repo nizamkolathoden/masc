@@ -1,21 +1,32 @@
 const router = require('express').Router();
+
 //middle ware
 const requireLogin = require('../middleware/index')
+
 //teacher DB
 const Teacher = require('../model/teacher')
 
-
+//course DB
+const Course = require('../model/course')
 
 //@desc show teacher data to student
 //@route get /all/showteacher 
 router.put('/showteacher', requireLogin,(req, res) => {
     const { batch, sem } = req.body;
     if (!sem) return res.status(402).json({ error: 'enter ' });
-    if (!batch) return res.status(402).json({ error: 'enter bath' });
+    if (!batch) return res.status(402).json({ error: 'enter batch' });
 
 
-    Teacher.find().populate('course').then(data => res.json(data))
+    Teacher.find().populate({
+        path: 'course',
+       $elemMatch : {'batch' : req.body.batch},
+       populate: {
+        path: "course",
+        select: ["batch", "sem"]
+       }
+    }).then(data => res.json(data))
     // .elemMatch("course", { batch: batch, sem: sem })
+    .catch(e=>console.log(e))
 })
 
 
@@ -23,13 +34,16 @@ router.put('/showteacher', requireLogin,(req, res) => {
 //@desc for shown teacher profile
 //@route get /all/teacherprofile
 router.get('/teacherprofile/:id',requireLogin, (req, res) => {
-    const { batch, sem } = req.body
 
-    Teacher.findOne({ "course._id": req.params.id }).then(data => res.json(data)).catch(e => console.log('error at show single subject', e))
+    Course.findById( req.params.id).then(data => res.json(data))
+    .catch(e => console.log('error at show single subject', e))
 })
 
-
-
+//@desc for good
+//@route put /all/good
+router.put("/good",(req,res)=>{
+    
+})
 
 
 

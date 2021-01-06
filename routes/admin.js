@@ -93,7 +93,8 @@ router.put("/post/subject/:id", (req, res) => {
 router.post('/question', (req, res) => {
 
         const question = {
-            text: req.body.question
+            text: req.body.question,
+            cover:req.body.option
         }
         Course.find().then(allCourse => {
             allCourse.map(singleCourse => {
